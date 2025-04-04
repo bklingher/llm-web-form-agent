@@ -168,12 +168,10 @@ class FormFillingAgent:
                 logger.info(json.dumps(mapping_strategy, indent=2))
                 return mapping_strategy
             except json.JSONDecodeError as e:
+                # TODO: Implement fallback strategy if JSON parsing fails
                 logger.error(f"JSON parsing error: {str(e)}")
                 logger.error(f"Could not parse response as JSON. Full response: {cleaned_content}")
-                
-                # Fallback strategy: create a basic mapping
-                return self.create_fallback_mapping(element_details)
-            
+
         except Exception as e:
             # TODO: Implement fallback strategy if LLM request fails completely
             logger.error(f"Error in LLM request: {str(e)}")
@@ -320,6 +318,10 @@ class FormFillingAgent:
         try:
             self.navigate_to_form()
             mapping_strategy = self.analyze_form()
+
+            if mapping_strategy is None:
+                return False
+
             self.fill_form(mapping_strategy)
             submitted = self.submit_form()
             
